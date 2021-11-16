@@ -1,10 +1,10 @@
-import DEFAULT_TOKEN_LIST from "@uniswap/default-token-list";
-import { TokenList } from "@uniswap/token-lists";
-import { useMemo } from "react";
-import { useSelector } from "react-redux";
-import { AppState } from "../index";
-import { UNSUPPORTED_LIST_URLS } from "../../constants/lists";
-import { WrappedTokenInfo } from "./wrappedTokenInfo";
+import DEFAULT_TOKEN_LIST from '@uniswap/default-token-list';
+import { TokenList } from '@uniswap/token-lists';
+import { useMemo } from 'react';
+import { useSelector } from 'react-redux';
+import { AppState } from '../index';
+import { UNSUPPORTED_LIST_URLS } from '../../constants/lists';
+import { WrappedTokenInfo } from './wrappedTokenInfo';
 
 export type TokenAddressMap = Readonly<{
   [chainId: number]: Readonly<{
@@ -13,7 +13,7 @@ export type TokenAddressMap = Readonly<{
 }>;
 
 const listCache: WeakMap<TokenList, TokenAddressMap> | null =
-  typeof WeakMap !== "undefined"
+  typeof WeakMap !== 'undefined'
     ? new WeakMap<TokenList, TokenAddressMap>()
     : null;
 
@@ -44,15 +44,15 @@ export function listToTokenMap(list: TokenList): TokenAddressMap {
 
 const TRANSFORMED_DEFAULT_TOKEN_LIST = listToTokenMap(DEFAULT_TOKEN_LIST);
 
-export function useAllLists(): AppState["glists"]["byUrl"] {
-  return useSelector<AppState, AppState["glists"]["byUrl"]>(
-    (state) => state.glists.byUrl
+export function useAllLists(): AppState['glists']['byUrl'] {
+  return useSelector<AppState, AppState['glists']['byUrl']>(
+    (state) => state.glists.byUrl,
   );
 }
 
 function combineMaps(
   map1: TokenAddressMap,
-  map2: TokenAddressMap
+  map2: TokenAddressMap,
 ): TokenAddressMap {
   return {
     [1]: { ...map1[1], ...map2[1] },
@@ -69,7 +69,7 @@ function combineMaps(
 
 // merge tokens contained within lists from urls
 function useCombinedTokenMapFromUrls(
-  urls: string[] | undefined
+  urls: string[] | undefined,
 ): TokenAddressMap {
   const lists = useAllLists();
   return useMemo(() => {
@@ -80,7 +80,7 @@ function useCombinedTokenMapFromUrls(
       try {
         return combineMaps(allTokens, listToTokenMap(current));
       } catch (error) {
-        console.error("Could not show token list due to error", error);
+        console.error('Could not show token list due to error', error);
         return allTokens;
       }
     }, {});
@@ -89,8 +89,8 @@ function useCombinedTokenMapFromUrls(
 
 // filter out unsupported lists
 export function useActiveListUrls(): string[] | undefined {
-  return useSelector<AppState, AppState["glists"]["activeListUrls"]>(
-    (state) => state.glists.activeListUrls
+  return useSelector<AppState, AppState['glists']['activeListUrls']>(
+    (state) => state.glists.activeListUrls,
   )?.filter((url) => !UNSUPPORTED_LIST_URLS.includes(url));
 }
 
@@ -99,7 +99,7 @@ export function useInactiveListUrls(): string[] {
   const allActiveListUrls = useActiveListUrls();
   return Object.keys(lists).filter(
     (url) =>
-      !allActiveListUrls?.includes(url) && !UNSUPPORTED_LIST_URLS.includes(url)
+      !allActiveListUrls?.includes(url) && !UNSUPPORTED_LIST_URLS.includes(url),
   );
 }
 
@@ -117,13 +117,13 @@ export function useUnsupportedTokenList(): TokenAddressMap {
 
   // get any loaded unsupported tokens
   const loadedUnsupportedListMap = useCombinedTokenMapFromUrls(
-    UNSUPPORTED_LIST_URLS
+    UNSUPPORTED_LIST_URLS,
   );
 
   // format into one token address map
   return useMemo(
     () => combineMaps(localUnsupportedListMap, loadedUnsupportedListMap),
-    [localUnsupportedListMap, loadedUnsupportedListMap]
+    [localUnsupportedListMap, loadedUnsupportedListMap],
   );
 }
 

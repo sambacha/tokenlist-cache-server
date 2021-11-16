@@ -1,12 +1,12 @@
-import { TokenList } from "@uniswap/token-lists";
-import schema from "@uniswap/token-lists/dist/tokenlist.schema.json";
-import Ajv from "ajv";
-import contenthashToUri from "./contenthashToUri";
-import { parseENSAddress } from "./parseENSAddress";
-import uriToHttp from "./urlToHttps";
+import { TokenList } from '@uniswap/token-lists';
+import schema from '@uniswap/token-lists/dist/tokenlist.schema.json';
+import Ajv from 'ajv';
+import contenthashToUri from './contenthashToUri';
+import { parseENSAddress } from './parseENSAddress';
+import uriToHttp from './urlToHttps';
 
 schema.definitions.TokenInfo.properties.symbol.pattern =
-  "^[a-zA-Z0-9+.\\-%/\\$]+$";
+  '^[a-zA-Z0-9+.\\-%/\\$]+$';
 const tokenListValidator = new Ajv({ allErrors: true }).compile(schema);
 
 /**
@@ -17,7 +17,7 @@ const tokenListValidator = new Ajv({ allErrors: true }).compile(schema);
 export default async function getTokenList(
   library: any,
   listUrl: string,
-  resolveENSContentHash: (library: any, ensName: string) => Promise<string>
+  resolveENSContentHash: (library: any, ensName: string) => Promise<string>,
 ): Promise<TokenList> {
   const parsedENS = parseENSAddress(listUrl);
   let urls: string[];
@@ -33,12 +33,12 @@ export default async function getTokenList(
     try {
       translatedUri = contenthashToUri(contentHashUri);
     } catch (error) {
-      console.debug("Failed to translate contenthash to URI", contentHashUri);
+      console.debug('Failed to translate contenthash to URI', contentHashUri);
       throw new Error(
-        `Failed to translate contenthash to URI: ${contentHashUri}`
+        `Failed to translate contenthash to URI: ${contentHashUri}`,
       );
     }
-    urls = uriToHttp(`${translatedUri}${parsedENS.ensPath ?? ""}`);
+    urls = uriToHttp(`${translatedUri}${parsedENS.ensPath ?? ''}`);
   } else {
     urls = uriToHttp(listUrl);
   }
@@ -47,9 +47,9 @@ export default async function getTokenList(
     const isLast = i === urls.length - 1;
     let response;
     try {
-      response = await fetch(url, { credentials: "omit" });
+      response = await fetch(url, { credentials: 'omit' });
     } catch (error) {
-      console.debug("Failed to fetch list", listUrl, error);
+      console.debug('Failed to fetch list', listUrl, error);
       if (isLast) throw new Error(`Failed to download list ${listUrl}`);
       continue;
     }
@@ -63,12 +63,12 @@ export default async function getTokenList(
     if (!tokenListValidator(json)) {
       const validationErrors: string =
         tokenListValidator.errors?.reduce<string>((memo, error) => {
-          const add = `${error.dataPath} ${error.message ?? ""}`;
+          const add = `${error.dataPath} ${error.message ?? ''}`;
           return memo.length > 0 ? `${memo}; ${add}` : `${add}`;
-        }, "") ?? "unknown error";
+        }, '') ?? 'unknown error';
       throw new Error(`Token list failed validation: ${validationErrors}`);
     }
     return json;
   }
-  throw new Error("Unrecognized list URL protocol.");
+  throw new Error('Unrecognized list URL protocol.');
 }
